@@ -69,9 +69,9 @@ The output revealed several interesting details about the domain.
 
 The domain-registration information provides useful background for reconnaissance, although WHOIS data alone does not provide enough information to determine the security of the domain or its infrastructure.
 
-![Whois output — top](whois.png)
+![Whois output — top](OSINT-RECON-MICROSOFT/whois.png)
 
-![Whois output — continued](whois2.png)
+![Whois output — continued](OSINT-RECON-MICROSOFT/whois2.png)
 
 ---
 
@@ -99,13 +99,13 @@ Historical snapshots can be useful during OSINT because they can reveal:
 * Changes in branding and technology
 * Potentially forgotten resources
 
-![Wayback Machine homepage](wayback.png)
+![Wayback Machine homepage](OSINT-RECON-MICROSOFT/wayback.png)
 
-![Wayback calendar — 2015](wayackdate.png)
+![Wayback calendar — 2015](OSINT-RECON-MICROSOFT/wayackdate.png)
 
-![Snapshot — Feb 2015 (part 1)](wayback1.png)
+![Snapshot — Feb 2015 (part 1)](OSINT-RECON-MICROSOFT/wayback1.png)
 
-![Snapshot — Feb 2015 (part 2)](wayback2.png)
+![Snapshot — Feb 2015 (part 2)](OSINT-RECON-MICROSOFT/wayback2.png)
 
 ---
 
@@ -158,9 +158,9 @@ This is useful from a defensive OSINT perspective because publicly exposed addre
 
 A breach count should not automatically be interpreted as proof that the mailbox itself was compromised. Breach databases can contain addresses that appeared in leaked datasets for different reasons.
 
-![HIBP — press@microsoft.com](press.png)
+![HIBP — press@microsoft.com](OSINT-RECON-MICROSOFT/press.png)
 
-![HIBP — abuse@microsoft.com](abuse.png)
+![HIBP — abuse@microsoft.com](OSINT-RECON-MICROSOFT/abuse.png)
 
 ---
 
@@ -211,9 +211,9 @@ A Shodan result associated with a hostname does **not automatically mean** that 
 
 The results therefore require verification before being treated as confirmed infrastructure ownership.
 
-![Shodan — summary](shodan1.png)
+![Shodan — summary](OSINT-RECON-MICROSOFT/shodan1.png)
 
-![Shodan — host results](shodan2.png)
+![Shodan — host results](OSINT-RECON-MICROSOFT/shodan2.png)
 
 ---
 
@@ -272,11 +272,11 @@ Maigret reported significant DNS resolution failures using its default asynchron
 
 This affected some of the checks and demonstrated how network conditions can influence OSINT enumeration results.
 
-![Maigret — microsoft results](maigret1.png)
+![Maigret — microsoft results](OSINT-RECON-MICROSOFT/maigret1.png)
 
-![Maigret — continued](maigret2.png)
+![Maigret — continued](OSINT-RECON-MICROSOFT/maigret2.png)
 
-![Maigret — additional username discovered](maigret3.png)
+![Maigret — additional username discovered](OSINT-RECON-MICROSOFT/maigret3.png)
 
 ---
 
@@ -334,17 +334,17 @@ The screenshots containing the finding have been redacted before publication.
 
 The purpose of the exercise is to demonstrate the discovery technique and its defensive implications, not to expose individual employees.
 
-![ExifTool — redacted metadata finding](email1.png)
+![ExifTool — redacted metadata finding](OSINT-RECON-MICROSOFT/email1.png)
 
-![ExifTool — 10-K part 1](MSFT1.png)
+![ExifTool — 10-K part 1](OSINT-RECON-MICROSOFT/MSFT1.png)
 
-![ExifTool — 10-K part 2](MSFT2.png)
+![ExifTool — 10-K part 2](OSINT-RECON-MICROSOFT/MSFT2.png)
 
-![ExifTool — 10-K part 3](MSFT3.png)
+![ExifTool — 10-K part 3](OSINT-RECON-MICROSOFT/MSFT3.png)
 
-![ExifTool — Annual Report](annual_report11.png)
+![ExifTool — Annual Report](OSINT-RECON-MICROSOFT/annual_report11.png)
 
-![ExifTool — Shareholder Letter](Shareholders1.png)
+![ExifTool — Shareholder Letter](OSINT-RECON-MICROSOFT/Shareholders1.png)
 
 ---
 
@@ -468,25 +468,26 @@ In this project, personal email addresses discovered in metadata were redacted.
 ```text
 .
 ├── README.md
-├── whois.png
-├── whois2.png
-├── wayback.png
-├── wayackdate.png
-├── wayback1.png
-├── wayback2.png
-├── press.png
-├── abuse.png
-├── shodan1.png
-├── shodan2.png
-├── maigret1.png
-├── maigret2.png
-├── maigret3.png
-├── email1.png
-├── MSFT1.png
-├── MSFT2.png
-├── MSFT3.png
-├── annual_report11.png
-└── Shareholders1.png
+├── OSINT-RECON-MICROSOFT/
+│   ├── whois.png
+│   ├── whois2.png
+│   ├── wayback.png
+│   ├── wayackdate.png
+│   ├── wayback1.png
+│   ├── wayback2.png
+│   ├── press.png
+│   ├── abuse.png
+│   ├── shodan1.png
+│   ├── shodan2.png
+│   ├── maigret1.png
+│   ├── maigret2.png
+│   ├── maigret3.png
+│   ├── email1.png
+│   ├── MSFT1.png
+│   ├── MSFT2.png
+│   ├── MSFT3.png
+│   ├── annual_report11.png
+│   └── Shareholders1.png
 ```
 
 ---
@@ -500,6 +501,4 @@ Self-directed learner
 
 LinkedIn: [Muhammad Muhsin Khamis](https://www.linkedin.com/in/muhammad-muhsin-khamis-9860b3311/)
 
----
 
-**End of Report**
