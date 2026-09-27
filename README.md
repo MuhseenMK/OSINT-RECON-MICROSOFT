@@ -1,9 +1,8 @@
-
 # 🔎 OSINT Reconnaissance — Microsoft.com
 
-**Student:** Muhammad Muhsin Khamis  
-**Program:** Cybersecurity — Self-Directed Project  
-**Target:** microsoft.com  
+**Student:** Muhammad Muhsin Khamis
+**Program:** Cybersecurity — Self-Directed Project
+**Target:** `microsoft.com`
 **Scope:** Passive OSINT only — no active scanning, no exploitation
 
 ---
@@ -12,294 +11,461 @@
 
 I previously used theHarvester against `microsoft.com` during an authorised lab at my internship. That lab was guided — I was told exactly which command to run.
 
-I wanted to know what else is possible. So I picked up OSINT as a self-study topic, watched David Bombal's OSINT walkthrough, and started experimenting with tools I hadn't used before.
+I wanted to understand what else was possible. So I picked up OSINT as a self-study topic, watched David Bombal's OSINT walkthrough, and started experimenting with tools I had not used before.
 
-This repo is the result. No instructor brief. No lab script. Just me, the tools, and a target.
+This repository is the result.
 
----
-
-## Scope & ethics
-
-- All activities were **passive**.
-- No systems were scanned, probed, or accessed.
-- All information gathered is **already public**.
-- No private individual's data was published — any leaked emails found in metadata are **redacted** in this repo.
-- Target chosen because it was already authorised during my earlier internship lab work.
+No instructor brief. No lab script. Just me, the tools, and a target.
 
 ---
 
-## Tools used
+## Scope & Ethics
 
-| Tool | Purpose | Status |
-|---|---|---|
-| Whois | Domain registration lookup | ✅ Worked |
-| Wayback Machine (browser) | Historical website snapshots | ✅ Worked |
-| `waybackurls` + CDX API | Bulk historical URL enumeration | ⚠️ API timed out — documented |
-| Have I Been Pwned | Email breach exposure | ✅ Worked |
-| Censys | Infrastructure / certificate recon | ⚠️ Free tier hung — documented |
-| Shodan | Internet-connected device search | ✅ Worked |
-| Maigret | Username enumeration across platforms | ✅ Worked (DNS issues) |
-| ExifTool | Document metadata extraction | ✅ Worked — **found a leak** |
-| Holehe | Email registration check | ✅ Worked (all rate-limited) |
+* All activities were **passive**.
+* No systems were intentionally scanned, probed, or accessed.
+* Information collected came from publicly available sources.
+* No private individual's data is intentionally published.
+* Email addresses discovered in document metadata have been **redacted**.
+* The target was selected because `microsoft.com` had already been used as an authorised lab target during my internship.
+
+> **Note:** The results documented here represent observations from the tools and sources used during this project. They should not be interpreted as a complete representation of Microsoft's infrastructure or security posture.
 
 ---
 
-## Task 1 — Whois Reconnaissance
+## Tools Used
 
-Ran:
+| Tool                    | Purpose                                     | Status                        |
+| ----------------------- | ------------------------------------------- | ----------------------------- |
+| Whois                   | Domain registration lookup                  | ✅ Worked                      |
+| Wayback Machine         | Historical website snapshots                | ✅ Worked                      |
+| `waybackurls` + CDX API | Historical URL enumeration                  | ⚠️ API timed out              |
+| Have I Been Pwned       | Public email breach exposure                | ✅ Worked                      |
+| Censys                  | Infrastructure / certificate reconnaissance | ⚠️ Search did not load        |
+| Shodan                  | Internet-facing infrastructure search       | ✅ Worked                      |
+| Maigret                 | Username enumeration across platforms       | ✅ Worked with DNS limitations |
+| ExifTool                | Document metadata extraction                | ✅ Worked                      |
+| Holehe                  | Email registration checks                   | ⚠️ Rate-limited               |
+
+---
+
+# Task 1 — Whois Reconnaissance
+
+### Command
 
 ```bash
 whois microsoft.com
+```
 
-The output revealed more than I expected.
+The output revealed several interesting details about the domain.
 
-What I found
-Registrar: MarkMonitor Inc. — enterprise-grade registrar used by large corporations. Not a consumer registrar.
+### What I found
 
-Created: 1991-05-02 — one of the oldest domains on the internet.
+* **Registrar:** MarkMonitor Inc.
+* **Created:** 1991-05-02
+* **Expires:** 2027-05-03
+* Multiple domain locks were present.
+* **Name servers:** Microsoft Azure DNS name servers.
+* **DNSSEC:** The lookup showed the domain as unsigned at the time of testing.
 
-Expires: 2027-05-03 — auto-renewed.
+The domain-registration information provides useful background for reconnaissance, although WHOIS data alone does not provide enough information to determine the security of the domain or its infrastructure.
 
-Six domain locks are in place (client + server). Three prevent deletion, transfer, and update. Hijacking this domain is effectively impossible.
+![Whois output — top](whois.png)
 
-Name servers: NS1-39.AZURE-DNS.COM/.NET/.ORG/.INFO — Microsoft hosts its own DNS across four different TLDs. Redundancy by design.
+![Whois output — continued](whois2.png)
 
-DNSSEC: unsigned — Microsoft doesn't have DNSSEC enabled. Worth noting as a low-risk observation.
+---
 
-https://whois.png/
+# Task 2 — Wayback Machine
 
-https://whois2.png/
+## Part A — Browser Method
 
-Task 2 — Wayback Machine
-Part A — Browser method
-I searched web.archive.org for microsoft.com and picked a snapshot from 17 February 2015.
+I searched the Wayback Machine for `microsoft.com` and selected a snapshot from **17 February 2015**.
 
-The page looked completely different from today:
+The website looked significantly different from the current Microsoft homepage.
 
-Navigation: Store / Explore / Devices / Software & apps / Support — product-centric structure
+### Observations
 
-Homepage promoted Office 365, Lumia 830, Xbox One — Microsoft was still in the phone business
+* Navigation included **Store / Explore / Devices / Software & apps / Support**.
+* The homepage promoted products and services including **Office 365, Lumia, and Xbox**.
+* The site structure and presentation were different from the current Microsoft website.
+* Some URLs still used `.aspx` extensions.
 
-No mention of Azure, AI, or Copilot
+Historical snapshots can be useful during OSINT because they can reveal:
 
-URL structure still used .aspx extensions — the pre-modern-routing era
+* Older website structures
+* Previous product pages
+* Historical URLs
+* Discontinued services
+* Changes in branding and technology
+* Potentially forgotten resources
 
-This is real OSINT. It reveals which products Microsoft has discontinued (Lumia, Windows Phone), old subdomains that may still resolve today, and historical marketing priorities.
+![Wayback Machine homepage](wayback.png)
 
-https://wayback.png/
+![Wayback calendar — 2015](wayackdate.png)
 
-https://wayackdate.png/
+![Snapshot — Feb 2015 (part 1)](wayback1.png)
 
-https://wayback1.png/
+![Snapshot — Feb 2015 (part 2)](wayback2.png)
 
-https://wayback2.png/
+---
 
-Part B — CLI method (failed)
-I tried waybackurls microsoft.com — it silently returned nothing. The tool hasn't been maintained and the CDX API has changed.
+## Part B — CLI Method
 
-I then tried fetching bulk URLs directly from the API:
+I attempted to use:
 
-bash
+```bash
+waybackurls microsoft.com
+```
+
+The command returned no useful results during my test.
+
+I then attempted to query the CDX API directly:
+
+```bash
 curl -s "http://web.archive.org/cdx/search/cdx?url=microsoft.com*&output=text&fl=original&collapse=urlkey&limit=5000"
-Got a 504 Gateway Time-out. The Wayback Machine's free API can't handle Microsoft-scale queries. I moved on rather than fight it.
+```
 
-Task 3 — Have I Been Pwned
-Checked two public role-based Microsoft addresses.
+The request returned a **504 Gateway Time-out**.
 
-Address	Breaches
-press@microsoft.com	2
-abuse@microsoft.com	23
-What this means
-abuse@microsoft.com appearing in 23 known breaches is a real signal:
+Rather than continuing to repeatedly query the service, I documented the failure and continued with the other OSINT tasks.
 
-Role-based public addresses get scraped, published, and leaked constantly
+### Lesson
 
-They're viable targets for phishing and spam
+Tool failure is also part of practical reconnaissance. A failed tool does not necessarily mean that the data does not exist.
 
-Microsoft's security team must handle a huge volume of malicious traffic to these mailboxes
+---
 
-Role-based public emails should be treated as compromised by default.
+# Task 3 — Have I Been Pwned
 
-https://press.png/
+I checked two **public role-based Microsoft addresses**:
 
-https://abuse.png/
+| Address               | Reported breaches |
+| --------------------- | ----------------: |
+| `press@microsoft.com` |                 2 |
+| `abuse@microsoft.com` |                23 |
 
-Task 4 — Censys (deferred)
-I signed up for Censys Free, searched microsoft.com, and the results never loaded. The UI sat on "Searching every corner of the internet…" indefinitely.
+### What this means
 
-This is a known limitation of Censys Free. Rather than waste time, I documented it and moved on. The same certificate-transparency data is available through crt.sh — deferred to focus on the tasks that worked.
+The results demonstrate that public role-based addresses can appear in breach datasets.
 
-Task 5 — Shodan
-Searched hostname:microsoft.com on Shodan.
+This is useful from a defensive OSINT perspective because publicly exposed addresses can become targets for:
 
-Headline numbers
-43,561 total hosts
+* Spam
+* Phishing
+* Credential attacks
+* Social engineering
+* Automated abuse
 
-Top country: United States (11,184)
+A breach count should not automatically be interpreted as proof that the mailbox itself was compromised. Breach databases can contain addresses that appeared in leaked datasets for different reasons.
 
-Top port: 443 (HTTPS, 27,249 hosts)
+![HIBP — press@microsoft.com](press.png)
 
-What surprised me
-Amazon.com, Inc. hosts more Microsoft-associated IPs (9,490) than Microsoft Corporation itself (7,175).
+![HIBP — abuse@microsoft.com](abuse.png)
 
-Microsoft runs a large portion of its public infrastructure on AWS — its biggest cloud competitor.
+---
 
-Other findings:
+# Task 4 — Censys
 
-9,895 servers still respond on plain HTTP (port 80) — a big legacy surface
+I signed up for Censys Free and attempted to search for `microsoft.com`.
 
-Non-standard ports in use: 8443, 4443, 8800 — likely admin panels and legacy services
+The search interface did not successfully return the expected results during my test.
 
-Only 8.4% of visible servers run Microsoft IIS — the rest are Kerio, nginx, Apache, CloudFront
+Rather than treating the failed search as a finding, I documented it as a **tool limitation during this investigation**.
 
-Kerio Connect webmail appears on 12,254 hosts — a third-party email server, not Microsoft Exchange
+Certificate-transparency data can also be investigated through other publicly available sources, but I deferred that part of the investigation to keep the project focused.
 
-https://shodan1.png/
+---
 
-https://shodan2.png/
+# Task 5 — Shodan
 
-Task 6 — Maigret Username Enumeration
-Ran:
+I searched Shodan using:
 
-bash
+```text
+hostname:microsoft.com
+```
+
+### Results observed during the test
+
+* **43,561 total hosts**
+* **Top country:** United States — 11,184
+* **Top port:** 443 — 27,249 hosts
+
+These numbers represent what Shodan exposed through the search at the time of my investigation. They should not be treated as Microsoft's complete infrastructure inventory.
+
+### Other observations
+
+The search also showed:
+
+* A significant number of hosts responding on **port 80**
+* Various non-standard ports including **8443, 4443, and 8800**
+* Multiple technologies and hosting providers associated with the returned results
+* Infrastructure appearing to be distributed across different providers
+
+One interesting observation was that Shodan associated a large number of Microsoft-related results with **Amazon.com, Inc.**
+
+This was interesting because Microsoft and Amazon are major competitors in the cloud-computing market, but third-party hosting/CDN/cloud infrastructure can be used by large organisations for many legitimate reasons.
+
+### Important limitation
+
+A Shodan result associated with a hostname does **not automatically mean** that the corresponding system is owned or directly operated by the organisation being investigated.
+
+The results therefore require verification before being treated as confirmed infrastructure ownership.
+
+![Shodan — summary](shodan1.png)
+
+![Shodan — host results](shodan2.png)
+
+---
+
+# Task 6 — Maigret Username Enumeration
+
+### Command
+
+```bash
 maigret microsoft --top-sites 50
-Findings
-16 accounts found under the username microsoft
+```
 
-Auto-discovered additional usernames: OpenAtMicrosoft, Microsoft, LenovoYoga3Pro
+### Findings
 
-Confirmed official accounts on: GitHub, Twitter, Facebook, YouTube, Telegram, LinkedIn, Medium, WordPress, Spotify, Vimeo, Bit.ly, SoundCloud, Tumblr, Flickr
+The scan identified multiple accounts associated with the username `microsoft`.
 
-Interesting details
-GitHub: github.com/microsoft — 8,312 public repositories, 130,567 followers, account created 2013-12-10
+Some platforms returned accounts that appeared to correspond to official Microsoft social-media or developer accounts.
 
-Twitter: 13,074,050 followers, account created 2009-09-14
+The scan also discovered additional usernames during enumeration.
 
-Facebook: 13,287,807 followers
+Examples included:
 
-Telegram bio: simply "Microsoft.com"
+* `OpenAtMicrosoft`
+* `Microsoft`
+* `LenovoYoga3Pro`
 
-Tool limitation
-Maigret reported 62% DNS resolution failures using its default async DNS resolver (aiodns). On high-latency networks this is common. The documented workaround is --dns-resolver threaded.
+### Interesting results
 
-https://maigret1.png/
+The enumeration returned official-looking accounts on platforms including:
 
-https://maigret2.png/
+* GitHub
+* X/Twitter
+* Facebook
+* YouTube
+* Telegram
+* LinkedIn
+* Medium
+* WordPress
+* Spotify
+* Vimeo
+* Bitly
+* SoundCloud
+* Tumblr
+* Flickr
 
-https://maigret3.png/
+One particularly interesting result was:
 
-Task 7 — ExifTool Metadata Extraction
-This is the task that found something real.
+```text
+github.com/microsoft
+```
 
-I downloaded three public documents from Microsoft's Investor Relations page:
+which is Microsoft's official GitHub organisation.
 
-2025_AnnualReport.docx
+### Tool limitation
 
-MSFT_FY25q4_10K.docx (the SEC 10-K filing)
+Maigret reported significant DNS resolution failures using its default asynchronous DNS resolver.
 
-2025_Shareholder_Letter.docx
+This affected some of the checks and demonstrated how network conditions can influence OSINT enumeration results.
 
-Then ran ExifTool on each:
+![Maigret — microsoft results](maigret1.png)
 
-bash
+![Maigret — continued](maigret2.png)
+
+![Maigret — additional username discovered](maigret3.png)
+
+---
+
+# Task 7 — ExifTool Metadata Extraction
+
+This was the most interesting part of the investigation.
+
+I downloaded three publicly available documents from Microsoft's Investor Relations resources:
+
+* `2025_AnnualReport.docx`
+* `MSFT_FY25q4_10K.docx`
+* `2025_Shareholder_Letter.docx`
+
+I then used ExifTool to inspect their metadata.
+
+### Command
+
+```bash
 exiftool ~/Downloads/MSFT_FY25q4_10K.docx
-What I found
-Microsoft did clean the visible metadata:
+```
 
-Creator: empty
+## What I found
 
-Last Modified By: empty
+The visible document metadata had been cleaned.
 
-Company: empty
+For example:
 
-Total Edit Time: reset to 0
+* `Creator`: empty
+* `Last Modified By`: empty
+* `Company`: empty
+* `Total Edit Time`: reset
 
-That's a deliberate cleaning process. Most organisations don't even do this much.
+However, the investigation showed that embedded hyperlinks could still contain information that was not immediately visible in the standard metadata fields.
 
-But they missed the hyperlinks.
+The `H Links` field contained `mailto:` hyperlinks associated with Microsoft personnel.
 
-The H Links field — an obscure metadata field that most cleaning tools don't touch — still contained embedded mailto: hyperlinks to four real Microsoft email addresses of investor relations and communications staff.
+### Why this was interesting
 
-Why this matters
-1. Confirms Microsoft's email format — [lastname]@microsoft.com and [initial][lastname]@microsoft.com
-2. Identifies who handles SEC filings internally — finance + comms teams
-3. Creates a social engineering vector — a targeted phishing list against Microsoft's investor relations
-4. Shows metadata cleaning is incomplete at the hyperlink layer — most tools check visible fields, not embedded links
+This demonstrated an important OSINT lesson:
 
-Redaction
-The leaked email addresses are not published in this repo. I've documented the finding and its significance without reproducing the personal information of real individuals. That's standard OSINT ethics.
+> Removing visible document metadata does not necessarily mean that every piece of embedded information has been removed.
 
-Dates leaked
-ExifTool also revealed internal document timelines:
+Embedded hyperlinks can potentially expose:
 
-. 10-K: created 2025-07-29 18:48 UTC
+* Email addresses
+* Organisational relationships
+* Internal document references
+* Information about the people involved in producing a document
 
-. Annual Report: created 2025-10-16 16:47 UTC
+### Redaction
 
-. Shareholder Letter: created 2025-10-15 18:45 UTC
+I am **not publishing the discovered personal email addresses** in this repository.
 
-These map Microsoft's internal financial reporting calendar.
+The screenshots containing the finding have been redacted before publication.
 
-https://email1.png/
+The purpose of the exercise is to demonstrate the discovery technique and its defensive implications, not to expose individual employees.
 
-https://msft1.png/
+![ExifTool — redacted metadata finding](email1.png)
 
-https://msft2.png/
+![ExifTool — 10-K part 1](MSFT1.png)
 
-https://msft3.png/
+![ExifTool — 10-K part 2](MSFT2.png)
 
-https://annual_report11.png/
+![ExifTool — 10-K part 3](MSFT3.png)
 
-https://shareholders1.png/
+![ExifTool — Annual Report](annual_report11.png)
 
+![ExifTool — Shareholder Letter](Shareholders1.png)
 
-Task 8 — Holehe Email Registration Check
-Ran:
+---
 
-bash
+## Document Timeline Observations
+
+ExifTool also exposed document creation timestamps.
+
+The documents contained timestamps including:
+
+* **10-K:** 2025-07-29 18:48 UTC
+* **Annual Report:** 2025-10-16 16:47 UTC
+* **Shareholder Letter:** 2025-10-15 18:45 UTC
+
+These timestamps provide information about when the document files were created.
+
+They should not automatically be interpreted as exact dates for Microsoft's internal business processes because document timestamps can be affected by document-generation and editing workflows.
+
+---
+
+# Task 8 — Holehe Email Registration Check
+
+### Commands
+
+```bash
 holehe press@microsoft.com
 holehe abuse@microsoft.com
-Holehe checked 121 platforms against each address.
+```
 
-Result
-All 121 checks returned [x] — rate-limited.
+Holehe attempted to check the addresses against numerous online services.
 
-That means the platforms blocked Holehe's enumeration for these specific addresses. Microsoft's role-based emails are so widely known and abused that platforms defend against them at scale.
+### Result
 
-This is a finding in itself:
+The checks returned rate-limit responses rather than successful account-enumeration results.
 
-Confirms that press@ and abuse@ are actively targeted and defended
+In other words, I did **not** obtain reliable evidence that these addresses were registered on the tested platforms.
 
-Validates the HIBP result (23 breaches on abuse@)
+### What I learned
 
-Shows the security posture around Microsoft's public-facing emails
+This was useful because it demonstrated a practical limitation of automated email-enumeration tools:
 
-Screenshot for Task 8 not captured separately — the terminal output is shown in this repo's notes.
+* Rate limiting can prevent enumeration.
+* Public or frequently tested addresses may trigger defensive controls.
+* A failed or rate-limited check should not be interpreted as proof that an account does or does not exist.
 
-Risk Analysis
-#	Finding	Impact	Risk Level
-1	Microsoft public emails leaked in HIBP (up to 23 breaches on abuse@)	High phishing exposure	High
-2	Real Microsoft emails found in 10-K metadata hyperlinks	Spear-phishing vector against investor relations	High
-3	Internal document dates leaked in metadata	Reveals internal reporting calendar	Medium
-4	9,895 servers respond on plain HTTP (port 80)	Legacy surface, possible downgrade attacks	Medium
-5	DNSSEC not enabled on microsoft.com	Theoretical DNS spoofing risk	Low
-6	Non-standard ports exposed (8443, 4443, 8800)	Possible admin/legacy interfaces	Medium
-7	Almost 60% of Microsoft-associated IPs hosted on AWS	Third-party cloud risk surface	Low
-8	Public role-based emails are 100% rate-limited by platforms	Defensive control (positive)	✅ Positive
-Risk key: Critical / High / Medium / Low
+---
 
-What I learned
-1. Passive OSINT can go deeper than I expected. Whois, Wayback, Shodan, and ExifTool together gave me a much fuller picture than theHarvester alone.
+# Risk Analysis
 
-2. Metadata is one of the most under-defended leak vectors. Microsoft cleaned their visible metadata but missed hyperlinks. That's a real, recurring mistake across many organisations.
+The following table represents **observations from this specific OSINT exercise**, not a complete security assessment of Microsoft.
 
-3. Tool failures are normal. Three of the eight tasks involved tools that didn't work. Documenting the failures was as important as the successes.
+| # | Finding                                                           | Potential Security Relevance                                    |
+| - | ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1 | Public Microsoft addresses appeared in breach datasets            | Increased phishing and spam exposure                            |
+| 2 | Email addresses were discovered inside document hyperlinks        | Potential social-engineering exposure                           |
+| 3 | Document timestamps were visible in metadata                      | Can reveal information about document creation                  |
+| 4 | Hosts responding on port 80 appeared in Shodan results            | Indicates HTTP exposure that may require verification           |
+| 5 | Non-standard ports appeared in Shodan results                     | May warrant further verification by an authorised security team |
+| 6 | Multiple third-party infrastructure providers appeared in results | Demonstrates a distributed external attack surface              |
+| 7 | Holehe checks were rate-limited                                   | Demonstrates defensive controls against automated enumeration   |
 
-4. Platforms defend known targets. Holehe returning 100% rate limits on Microsoft addresses shows that high-profile role emails are protected at scale.
+> **Important:** The findings above are not proof of vulnerabilities. They are OSINT observations that would require authorised validation before security conclusions could be made.
 
-5. Ethics matters in OSINT. Finding leaked data doesn't mean publishing it. Redaction is what separates a professional from an amateur.
+---
 
-Repository Structure
+# What a Defender Could Take From This
+
+This project showed me several defensive lessons:
+
+* Metadata-cleaning processes should consider **embedded hyperlinks**, not only visible metadata fields.
+* Public role-based email addresses should be treated as publicly exposed information.
+* Organisations can use passive OSINT against their own domains to understand what information is externally visible.
+* Search-engine and OSINT results should be verified before being treated as confirmed infrastructure.
+* Automated enumeration tools can be affected by DNS failures, rate limiting, API restrictions, and network conditions.
+* Redacting sensitive information before publishing research is an important part of responsible OSINT practice.
+
+I am still learning, so these are observations from the perspective of a cybersecurity student rather than professional security recommendations for an organisation of Microsoft's scale.
+
+---
+
+# What I Learned
+
+### 1. Passive OSINT goes deeper than I expected
+
+Whois, Wayback Machine, Shodan, Maigret, HIBP, and ExifTool provided different pieces of information.
+
+No single tool gave the complete picture.
+
+### 2. Metadata can contain useful information
+
+The ExifTool investigation was the biggest learning point for me.
+
+Even when visible metadata is cleaned, embedded document information can still deserve investigation.
+
+### 3. Tool failures are normal
+
+Some tools did not work as expected because of:
+
+* API timeouts
+* DNS resolution problems
+* Rate limiting
+* Search-interface issues
+
+Instead of hiding these failures, I documented them.
+
+### 4. OSINT results require interpretation
+
+Finding an IP address, email address, username, or historical URL does not automatically mean that it represents a vulnerability.
+
+The result needs context and, where appropriate, authorised verification.
+
+### 5. Ethics matters in OSINT
+
+Finding publicly accessible information does not mean that everything should be republished.
+
+In this project, personal email addresses discovered in metadata were redacted.
+
+---
+
+# Repository Structure
+
+```text
 .
 ├── README.md
 ├── whois.png
@@ -321,9 +487,19 @@ Repository Structure
 ├── MSFT3.png
 ├── annual_report11.png
 └── Shareholders1.png
+```
 
-Author
-Muhammad Muhsin Khamis
+---
+
+# Author
+
+**Muhammad Muhsin Khamis**
+
 Cybersecurity Student — Bayero University Kano
 Self-directed learner
-LinkedIn: https://www.linkedin.com/in/muhammad-muhsin-khamis-9860b3311/
+
+LinkedIn: [Muhammad Muhsin Khamis](https://www.linkedin.com/in/muhammad-muhsin-khamis-9860b3311/)
+
+---
+
+**End of Report**
